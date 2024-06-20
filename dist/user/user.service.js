@@ -18,6 +18,7 @@ const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("./user.schema");
 const crypto = require("crypto");
+const sgMail = require("@sendgrid/mail");
 let UserService = class UserService {
     constructor(userModel) {
         this.userModel = userModel;
@@ -54,6 +55,22 @@ let UserService = class UserService {
         return user.isVerified ? "User is verified" : "User is not verified";
     }
     async sendVerificationEmail(email, token) {
+        sgMail.setApiKey(process.env.SENDGRID_API_KEYS);
+        const msg = {
+            to: email,
+            from: "egeoztas@sabanciuniv.edu",
+            subject: "Your verification code",
+            text: "The following is your verification code: " + token,
+            html: "<p>${token}</p>",
+        };
+        sgMail
+            .send(msg)
+            .then(() => {
+            console.log("Email sent");
+        })
+            .catch((error) => {
+            console.error(error);
+        });
     }
 };
 exports.UserService = UserService;

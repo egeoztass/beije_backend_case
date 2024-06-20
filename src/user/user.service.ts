@@ -3,6 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Model } from "mongoose";
 import { User, UserDocument } from "./user.schema";
 import * as crypto from "crypto";
+const sgMail = require("@sendgrid/mail");
 
 @Injectable()
 export class UserService {
@@ -50,6 +51,21 @@ export class UserService {
   }
 
   private async sendVerificationEmail(email: string, token: string) {
-    // Implementation for email sending (nodemailer or other service)
+    sgMail.setApiKey(process.env.SENDGRID_API_KEYS);
+    const msg = {
+      to: email, // Change to your recipient
+      from: process.env.MAIL_ADRESS, // Change to your verified sender
+      subject: "Your verification code",
+      text: "The following is your verification code: " + token,
+      html: "<p>${token}</p>",
+    };
+    sgMail
+      .send(msg)
+      .then(() => {
+        console.log("Email sent");
+      })
+      .catch((error) => {
+        console.error(error);
+      });
   }
 }
